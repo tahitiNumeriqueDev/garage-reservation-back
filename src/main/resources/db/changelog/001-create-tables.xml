@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="001-create-creneaux-table" author="garage-api">
+        <createTable tableName="creneaux">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="heure_debut" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="heure_fin" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="disponible" type="boolean" defaultValue="true">
+                <constraints nullable="true"/>
+            </column>
+            <column name="capacite_totale" type="int" defaultValue="1">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-reservations-table" author="garage-api">
+        <createTable tableName="reservations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="immatriculation" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="kilometrage" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type_vehicule" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="poids_lourd" type="boolean" defaultValue="false">
+                <constraints nullable="true"/>
+            </column>
+            <column name="numero_telephone" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="statut" type="varchar(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="date_creation" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+            <column name="date_modification" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+            <column name="creneau_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-add-foreign-key-constraint" author="garage-api">
+        <addForeignKeyConstraint
+                baseTableName="reservations"
+                baseColumnNames="creneau_id"
+                constraintName="fk_reservation_creneau"
+                referencedTableName="creneaux"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="004-create-indexes" author="garage-api">
+        <createIndex indexName="idx_creneaux_heure_debut" tableName="creneaux">
+            <column name="heure_debut"/>
+        </createIndex>
+        <createIndex indexName="idx_creneaux_disponible" tableName="creneaux">
+            <column name="disponible"/>
+        </createIndex>
+        <createIndex indexName="idx_reservations_immatriculation" tableName="reservations">
+            <column name="immatriculation"/>
+        </createIndex>
+        <createIndex indexName="idx_reservations_telephone" tableName="reservations">
+            <column name="numero_telephone"/>
+        </createIndex>
+        <createIndex indexName="idx_reservations_creneau_id" tableName="reservations">
+            <column name="creneau_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog> 

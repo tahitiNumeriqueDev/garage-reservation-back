@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="001-insert-sample-creneaux" author="garage-api">
+        <comment>Insertion des créneaux de test</comment>
+        
+        <!-- Créneaux pour le 23 décembre 2024 -->
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-23 08:00:00"/>
+            <column name="heure_fin" value="2024-12-23 09:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-23 09:00:00"/>
+            <column name="heure_fin" value="2024-12-23 10:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-23 10:00:00"/>
+            <column name="heure_fin" value="2024-12-23 11:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-23 11:00:00"/>
+            <column name="heure_fin" value="2024-12-23 12:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-23 14:00:00"/>
+            <column name="heure_fin" value="2024-12-23 15:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-23 15:00:00"/>
+            <column name="heure_fin" value="2024-12-23 16:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-23 16:00:00"/>
+            <column name="heure_fin" value="2024-12-23 17:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-23 17:00:00"/>
+            <column name="heure_fin" value="2024-12-23 18:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+
+        <!-- Créneaux pour le 24 décembre 2024 -->
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-24 08:00:00"/>
+            <column name="heure_fin" value="2024-12-24 09:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-24 09:00:00"/>
+            <column name="heure_fin" value="2024-12-24 10:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-24 10:00:00"/>
+            <column name="heure_fin" value="2024-12-24 11:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-24 11:00:00"/>
+            <column name="heure_fin" value="2024-12-24 12:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-24 14:00:00"/>
+            <column name="heure_fin" value="2024-12-24 15:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-24 15:00:00"/>
+            <column name="heure_fin" value="2024-12-24 16:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-24 16:00:00"/>
+            <column name="heure_fin" value="2024-12-24 17:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-24 17:00:00"/>
+            <column name="heure_fin" value="2024-12-24 18:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+
+        <!-- Créneaux pour le 30 décembre 2024 -->
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-30 08:00:00"/>
+            <column name="heure_fin" value="2024-12-30 09:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-30 09:00:00"/>
+            <column name="heure_fin" value="2024-12-30 10:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-30 10:00:00"/>
+            <column name="heure_fin" value="2024-12-30 11:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-30 11:00:00"/>
+            <column name="heure_fin" value="2024-12-30 12:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-30 14:00:00"/>
+            <column name="heure_fin" value="2024-12-30 15:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-30 15:00:00"/>
+            <column name="heure_fin" value="2024-12-30 16:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-30 16:00:00"/>
+            <column name="heure_fin" value="2024-12-30 17:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+        <insert tableName="creneaux">
+            <column name="heure_debut" value="2024-12-30 17:00:00"/>
+            <column name="heure_fin" value="2024-12-30 18:00:00"/>
+            <column name="disponible" value="true"/>
+            <column name="capacite_totale" value="2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="002-insert-sample-reservations" author="garage-api">
+        <comment>Insertion des réservations de test</comment>
+        
+        <insert tableName="reservations">
+            <column name="immatriculation" value="AB-123-CD"/>
+            <column name="kilometrage" value="75000"/>
+            <column name="type_vehicule" value="AUTO"/>
+            <column name="poids_lourd" value="false"/>
+            <column name="numero_telephone" value="0123456789"/>
+            <column name="email" value="test@example.com"/>
+            <column name="statut" value="RESERVEE"/>
+            <column name="date_creation" value="2024-12-20 10:00:00"/>
+            <column name="date_modification" value="2024-12-20 10:00:00"/>
+            <column name="creneau_id" value="1"/>
+        </insert>
+        
+        <insert tableName="reservations">
+            <column name="immatriculation" value="EF-456-GH"/>
+            <column name="kilometrage" value="120000"/>
+            <column name="type_vehicule" value="AUTO"/>
+            <column name="poids_lourd" value="true"/>
+            <column name="numero_telephone" value="0987654321"/>
+            <column name="email" value="test2@example.com"/>
+            <column name="statut" value="CONFIRMEE"/>
+            <column name="date_creation" value="2024-12-20 11:00:00"/>
+            <column name="date_modification" value="2024-12-20 11:00:00"/>
+            <column name="creneau_id" value="2"/>
+        </insert>
+        
+        <insert tableName="reservations">
+            <column name="immatriculation" value="IJ-789-KL"/>
+            <column name="kilometrage" value="25000"/>
+            <column name="type_vehicule" value="MOTO"/>
+            <column name="poids_lourd" value="false"/>
+            <column name="numero_telephone" value="0147258369"/>
+            <column name="email" value="test3@example.com"/>
+            <column name="statut" value="RESERVEE"/>
+            <column name="date_creation" value="2024-12-20 12:00:00"/>
+            <column name="date_modification" value="2024-12-20 12:00:00"/>
+            <column name="creneau_id" value="9"/>
+        </insert>
+        
+        <insert tableName="reservations">
+            <column name="immatriculation" value="MN-012-OP"/>
+            <column name="kilometrage" value="90000"/>
+            <column name="type_vehicule" value="AUTO"/>
+            <column name="poids_lourd" value="false"/>
+            <column name="numero_telephone" value="0369258147"/>
+            <column name="email" value="test4@example.com"/>
+            <column name="statut" value="CONFIRMEE"/>
+            <column name="date_creation" value="2024-12-20 13:00:00"/>
+            <column name="date_modification" value="2024-12-20 13:00:00"/>
+            <column name="creneau_id" value="10"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog> 
