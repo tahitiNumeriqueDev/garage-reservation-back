@@ -1,0 +1,55 @@
+# Fichiers et dossiers à ignorer lors du build Docker
+
+# Répertoire target Maven
+target/
+
+# Fichiers IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers de log
+*.log
+
+# Fichiers de sauvegarde
+*.backup
+*.bak
+*.tmp
+*.swp
+
+# Fichiers Git
+.git/
+.gitignore
+
+# Fichiers de documentation
+README.md
+docs/
+
+# Fichiers de configuration locale
+.env
+.env.local
+
+# Fichiers de test
+src/test/
+
+# Fichiers Dockerfile et Docker Compose
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Fichiers Railway (plus nécessaires avec Docker)
+railway.toml
+nixpacks.toml
+
+# Cache Maven local
+.m2/
+
+# Fichiers temporaires
+*.tmp
+*.temp 

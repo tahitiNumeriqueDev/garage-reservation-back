@@ -28,12 +28,42 @@ Cette API Java Spring Boot permet de gérer les réservations de créneaux pour 
 - PostgreSQL (pour le développement local)
 
 ### Démarrage local
+
+#### Avec Maven
 ```bash
 # Compiler le projet
 mvn clean compile
 
 # Lancer l'application
 mvn spring-boot:run
+```
+
+#### Avec Docker
+```bash
+# Construire l'image Docker
+docker build -t garage-reservation .
+
+# Lancer le conteneur (avec base de données locale)
+docker run -p 8080:8080 \
+  -e DATABASE_URL=jdbc:postgresql://host.docker.internal:5432/garage_db \
+  -e DATABASE_USER=postgres \
+  -e DATABASE_PASSWORD=password \
+  garage-reservation
+```
+
+#### Avec Docker Compose (recommandé)
+```bash
+# Démarrer l'application avec PostgreSQL
+docker-compose up -d
+
+# Voir les logs
+docker-compose logs -f
+
+# Arrêter l'application
+docker-compose down
+
+# Redémarrer après modifications
+docker-compose up -d --build
 ```
 
 L'API sera disponible sur `http://localhost:8080`
@@ -68,22 +98,31 @@ docker run --name postgres-garage -e POSTGRES_DB=garage_db -e POSTGRES_USER=post
 #### 1. Prérequis Railway
 - Compte Railway créé
 - Base de données PostgreSQL provisionnée sur Railway
+- Dockerfile présent dans le projet
 
 #### 2. Configuration
 Railway injecte automatiquement les variables d'environnement de la base de données :
 - `DATABASE_URL` (ou `POSTGRES_URL`)
 - `DATABASE_USER` (ou `POSTGRES_USER`)
 - `DATABASE_PASSWORD` (ou `POSTGRES_PASSWORD`)
+- `PORT` (assigné automatiquement par Railway)
 
-#### 3. Déploiement
+#### 3. Déploiement avec Docker
 ```bash
 # Connecter le repository à Railway
 railway login
 railway link
 
-# Déployer
+# Déployer (Railway détecte automatiquement le Dockerfile)
 railway deploy
 ```
+
+#### 4. Avantages du Dockerfile
+- **Contrôle total** de l'environnement d'exécution
+- **Build reproductible** sur tous les environnements
+- **Optimisation** avec multi-stage build
+- **Sécurité** avec utilisateur non-root
+- **Performance** avec mise en cache des dépendances
 
 ### Migrations Liquibase
 Les migrations de base de données sont gérées automatiquement par Liquibase au démarrage de l'application.
@@ -245,21 +284,26 @@ Les données de test sont définies dans le fichier `src/main/resources/db/chang
 
 ### Structure du projet
 ```
-src/main/java/com/garage/reservation/
-├── model/          # Entités JPA
-├── dto/            # Objets de transfert de données
-├── repository/     # Repositories JPA
-├── service/        # Services métier
-├── controller/     # Contrôleurs REST
-├── exception/      # Gestionnaire d'erreurs
-└── GarageReservationApplication.java
-
-src/main/resources/
-├── db/changelog/   # Migrations Liquibase
-│   ├── db.changelog-master.xml
-│   ├── 001-create-tables.xml
-│   └── 002-insert-sample-data.xml
-└── application.properties
+garage-reservation/
+├── Dockerfile                      # Configuration Docker
+├── .dockerignore                   # Fichiers ignorés par Docker
+├── pom.xml                        # Configuration Maven
+├── README.md                      # Documentation
+├── src/main/java/com/garage/reservation/
+│   ├── model/          # Entités JPA
+│   ├── dto/            # Objets de transfert de données
+│   ├── repository/     # Repositories JPA
+│   ├── service/        # Services métier
+│   ├── controller/     # Contrôleurs REST
+│   ├── config/         # Configuration OpenAPI
+│   ├── exception/      # Gestionnaire d'erreurs
+│   └── GarageReservationApplication.java
+└── src/main/resources/
+    ├── db/changelog/   # Migrations Liquibase
+    │   ├── db.changelog-master.xml
+    │   ├── 001-create-tables.xml
+    │   └── 002-insert-sample-data.xml
+    └── application.properties
 ```
 
 ### Tests
@@ -293,10 +337,35 @@ mvn liquibase:rollback -Dliquibase.rollbackCount=1
 mvn liquibase:generateChangeLog
 ```
 
+### Commandes Docker utiles
+
+```bash
+# Construire l'image
+docker build -t garage-reservation .
+
+# Lancer le conteneur
+docker run -p 8080:8080 garage-reservation
+
+# Lancer en arrière-plan
+docker run -d -p 8080:8080 --name garage-api garage-reservation
+
+# Voir les logs
+docker logs garage-api
+
+# Arrêter le conteneur
+docker stop garage-api
+
+# Supprimer le conteneur
+docker rm garage-api
+
+# Supprimer l'image
+docker rmi garage-reservation
+```
+
 ### Variables d'environnement Railway
 
 Lors du déploiement sur Railway, les variables suivantes sont automatiquement injectées :
 - `DATABASE_URL` : URL complète de la base PostgreSQL
 - `DATABASE_USER` : Nom d'utilisateur
 - `DATABASE_PASSWORD` : Mot de passe
-- `PORT` : Port d'écoute (Railway l'assigne automatiquement) # garage-reservation-back
+- `PORT` : Port d'écoute (Railway l'assigne automatiquement)
