@@ -1,6 +1,7 @@
 com/garage/reservation/exception/GlobalExceptionHandler.class
 com/garage/reservation/model/Creneau.class
 com/garage/reservation/service/CreneauService.class
+com/garage/reservation/service/CreneauGenerationService.class
 com/garage/reservation/mapper/ReservationMapperImpl.class
 com/garage/reservation/model/Creneau$CreneauBuilder.class
 com/garage/reservation/mapper/CreneauMapperImpl.class
@@ -21,6 +22,7 @@ com/garage/reservation/model/Reservation.class
 com/garage/reservation/mapper/CreneauMapper.class
 com/garage/reservation/util/DateTimeUtil.class
 com/garage/reservation/repository/CreneauRepository.class
+com/garage/reservation/controller/AdminController.class
 com/garage/reservation/config/OpenApiConfig.class
 com/garage/reservation/dto/CreneauDTO.class
 com/garage/reservation/controller/CreneauController.class

@@ -1,0 +1,19 @@
+databaseChangeLog:
+  # ============================================================================
+  # Changelog Master - API Garage Réservation
+  # ============================================================================
+  # Ce fichier orchestre toutes les migrations de base de données
+  # Format YAML pour plus de lisibilité et maintenance
+  # ============================================================================
+  
+  # Migration 1 : Création des tables de base (creneaux, reservations)
+  - include:
+      file: classpath:db/changelog/001-create-tables.xml
+      
+  # Migration 2 : Insertion des données de test
+  - include:
+      file: classpath:db/changelog/002-insert-sample-data.xml
+      
+  # Migration 3 : Génération automatique des créneaux juillet-août 2025
+  - include:
+      file: classpath:db/changelog/003-generate-creneaux-juillet-aout-2025.yml 
