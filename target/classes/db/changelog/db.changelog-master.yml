@@ -16,4 +16,8 @@ databaseChangeLog:
       
   # Migration 3 : Génération automatique des créneaux juillet-août 2025
   - include:
-      file: classpath:db/changelog/003-generate-creneaux-juillet-aout-2025.yml 
+      file: classpath:db/changelog/003-generate-creneaux-juillet-aout-2025.yml
+
+  # Migration 4 : Index pour optimiser les requêtes de disponibilité
+  - include:
+      file: classpath:db/changelog/005-add-availability-indexes.yml 

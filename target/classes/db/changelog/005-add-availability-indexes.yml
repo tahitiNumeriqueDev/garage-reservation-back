@@ -1,0 +1,66 @@
+databaseChangeLog:
+  # ============================================================================
+  # Migration 005 : Ajout des index pour optimiser les requêtes de disponibilité
+  # ============================================================================
+  # Cette migration ajoute les index qui manquent pour optimiser les performances
+  # des requêtes qui vérifient la disponibilité des créneaux en fonction 
+  # des réservations actives (non-annulées)
+  # ============================================================================
+
+  - changeSet:
+      id: 005-add-availability-indexes
+      author: garage-api
+      comment: "Ajout des index composites pour optimiser les requêtes de disponibilité"
+      context: "prod,dev"
+      runOnChange: false
+      runAlways: false
+      
+      preConditions:
+        - onFail: WARN
+        - onError: CONTINUE
+        - not:
+          - indexExists:
+              indexName: idx_creneaux_heure_debut_disponible
+        
+      changes:
+        # Index composite pour les requêtes par date ET disponibilité
+        # Utilisé par les requêtes findCreneauxDisponiblesByDate/Week
+        - createIndex:
+            indexName: idx_creneaux_heure_debut_disponible
+            tableName: creneaux
+            columns:
+              - column:
+                  name: heure_debut
+              - column:
+                  name: disponible
+        
+        # Index sur le statut des réservations pour optimiser les JOIN et WHERE
+        # Utilisé dans les requêtes avec CASE WHEN r.statut != 'ANNULEE'
+        - createIndex:
+            indexName: idx_reservations_statut
+            tableName: reservations
+            columns:
+              - column:
+                  name: statut
+        
+        # Index composite pour optimiser les COUNT sur les réservations par créneau et statut
+        # Utilisé dans les HAVING COUNT(CASE WHEN r.statut != 'ANNULEE' THEN 1 END)
+        - createIndex:
+            indexName: idx_reservations_creneau_statut
+            tableName: reservations
+            columns:
+              - column:
+                  name: creneau_id
+              - column:
+                  name: statut
+                  
+      rollback:
+        - dropIndex:
+            indexName: idx_creneaux_heure_debut_disponible
+            tableName: creneaux
+        - dropIndex:
+            indexName: idx_reservations_statut
+            tableName: reservations
+        - dropIndex:
+            indexName: idx_reservations_creneau_statut
+            tableName: reservations 

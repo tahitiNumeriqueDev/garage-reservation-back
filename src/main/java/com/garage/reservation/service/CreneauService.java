@@ -52,19 +52,20 @@ public class CreneauService {
     
     /**
      * Récupère les créneaux disponibles d'un jour donné
+     * (prend en compte les réservations non-annulées par rapport à la capacité)
      */
     public List<CreneauDTO> getCreneauxDisponiblesByDate(Instant date) {
         Instant debutJour = DateTimeUtil.getStartOfDay(date);
         Instant finJour = DateTimeUtil.getStartOfNextDay(date);
         return creneauRepository.findCreneauxDisponiblesByDate(debutJour, finJour)
                 .stream()
-                .filter(creneau -> creneau.estDisponible())
                 .map(creneauMapper::toDTO)
                 .collect(Collectors.toList());
     }
     
     /**
      * Récupère les créneaux d'une semaine donnée (du lundi au dimanche)
+     * (charge les réservations pour afficher la disponibilité correcte)
      */
     public List<CreneauDTO> getCreneauxByWeek(Instant date) {
         Instant debutSemaine = DateTimeUtil.getStartOfWeek(date);
@@ -77,13 +78,13 @@ public class CreneauService {
     
     /**
      * Récupère les créneaux disponibles d'une semaine donnée (du lundi au dimanche)
+     * (prend en compte les réservations non-annulées par rapport à la capacité)
      */
     public List<CreneauDTO> getCreneauxDisponiblesByWeek(Instant date) {
         Instant debutSemaine = DateTimeUtil.getStartOfWeek(date);
         Instant finSemaine = DateTimeUtil.getStartOfNextWeek(date);
         return creneauRepository.findCreneauxDisponiblesByWeek(debutSemaine, finSemaine)
                 .stream()
-                .filter(creneau -> creneau.estDisponible())
                 .map(creneauMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -100,11 +101,11 @@ public class CreneauService {
     
     /**
      * Récupère les créneaux disponibles entre deux dates
+     * (prend en compte les réservations non-annulées par rapport à la capacité)
      */
     public List<CreneauDTO> getCreneauxDisponiblesBetweenDates(Instant dateDebut, Instant dateFin) {
         return creneauRepository.findCreneauxDisponiblesBetweenDates(dateDebut, dateFin)
                 .stream()
-                .filter(creneau -> creneau.estDisponible())
                 .map(creneauMapper::toDTO)
                 .collect(Collectors.toList());
     }

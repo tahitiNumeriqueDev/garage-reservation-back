@@ -43,11 +43,53 @@ public class Creneau {
     private List<Reservation> reservations;
     
     // Méthodes métier (non générées par Lombok)
+    
+    /**
+     * Vérifie si le créneau est disponible pour une nouvelle réservation
+     * Un créneau est disponible si :
+     * - Le flag disponible est à true
+     * - Le nombre de réservations non-annulées est inférieur à la capacité totale
+     */
     public boolean estDisponible() {
-        return disponible && (reservations == null || reservations.size() < capaciteTotale);
+        if (!disponible) {
+            return false;
+        }
+        
+        if (reservations == null) {
+            return true;
+        }
+        
+        long reservationsActives = reservations.stream()
+                .filter(reservation -> reservation.getStatut() != StatutReservation.ANNULEE)
+                .count();
+        
+        return reservationsActives < capaciteTotale;
     }
     
+    /**
+     * Retourne le nombre de réservations actives (non-annulées)
+     */
     public int getNombreReservations() {
+        if (reservations == null) {
+            return 0;
+        }
+        
+        return (int) reservations.stream()
+                .filter(reservation -> reservation.getStatut() != StatutReservation.ANNULEE)
+                .count();
+    }
+    
+    /**
+     * Retourne le nombre total de réservations (y compris annulées)
+     */
+    public int getNombreTotalReservations() {
         return reservations != null ? reservations.size() : 0;
+    }
+    
+    /**
+     * Retourne le nombre de places encore disponibles
+     */
+    public int getNombrePlacesDisponibles() {
+        return Math.max(0, capaciteTotale - getNombreReservations());
     }
 } 
