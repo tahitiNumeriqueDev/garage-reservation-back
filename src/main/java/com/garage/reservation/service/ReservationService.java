@@ -113,26 +113,32 @@ public class ReservationService {
      * Crée une nouvelle réservation
      */
     public ReservationDTO createReservation(CreationReservationDTO creationDTO) {
-        // Vérifier que le créneau existe
+        // Vérifier que le créneau existe et est réellement disponible
+        // (vérification robuste qui prend en compte les réservations actives)
+        Boolean creneauDisponible = creneauRepository.isCreneauReallyAvailable(creationDTO.getCreneauId());
+        
+        if (creneauDisponible == null || !creneauDisponible) {
+            if (creneauDisponible == null) {
+                throw new IllegalArgumentException("Le créneau spécifié n'existe pas");
+            } else {
+                throw new IllegalStateException("Le créneau n'est plus disponible (capacité atteinte)");
+            }
+        }
+        
+        // Récupérer le créneau (maintenant on sait qu'il existe et est disponible)
         Optional<Creneau> creneauOpt = creneauRepository.findById(creationDTO.getCreneauId());
-        if (creneauOpt.isEmpty()) {
-            throw new IllegalArgumentException("Le créneau spécifié n'existe pas");
-        }
-        
-        Creneau creneau = creneauOpt.get();
-        
-        // Vérifier que le créneau est disponible
-        if (!creneau.estDisponible()) {
-            throw new IllegalStateException("Le créneau n'est plus disponible");
-        }
+        Creneau creneau = creneauOpt.get(); // Safe car on vient de vérifier
         
         // Créer la réservation
         Reservation reservation = reservationMapper.toEntity(creationDTO);
         reservation.setCreneau(creneau);
         reservation.setStatut(StatutReservation.RESERVEE);
         
-        // Sauvegarder
+        // Sauvegarder la réservation
         reservation = reservationRepository.save(reservation);
+        
+        // Mettre à jour le flag disponible du créneau si nécessaire
+        updateCreneauDisponibilite(creneau);
         
         return reservationMapper.toDTO(reservation);
     }
@@ -147,8 +153,14 @@ public class ReservationService {
         }
         
         Reservation reservation = reservationOpt.get();
+        StatutReservation ancienStatut = reservation.getStatut();
         reservation.setStatut(nouveauStatut);
         reservation = reservationRepository.save(reservation);
+        
+        // Mettre à jour la disponibilité du créneau si le statut change entre actif/inactif
+        if (isStatutChangeAffectingAvailability(ancienStatut, nouveauStatut)) {
+            updateCreneauDisponibilite(reservation.getCreneau());
+        }
         
         return Optional.of(reservationMapper.toDTO(reservation));
     }
@@ -162,5 +174,51 @@ public class ReservationService {
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Met à jour automatiquement le flag disponible d'un créneau selon sa capacité
+     */
+    private void updateCreneauDisponibilite(Creneau creneau) {
+        // Recharger le créneau avec ses réservations pour avoir les données à jour
+        Optional<Creneau> creneauWithReservations = creneauRepository.findByIdWithReservations(creneau.getId());
+        
+        if (creneauWithReservations.isPresent()) {
+            Creneau creneauActuel = creneauWithReservations.get();
+            
+            // Compter les réservations actives
+            int reservationsActives = creneauActuel.getNombreReservations();
+            
+            // Déterminer le nouveau statut disponible
+            boolean nouvelleDisponibilite = reservationsActives < creneauActuel.getCapaciteTotale();
+            
+            // Mettre à jour seulement si nécessaire
+            if (creneauActuel.getDisponible() != nouvelleDisponibilite) {
+                creneauActuel.setDisponible(nouvelleDisponibilite);
+                creneauRepository.save(creneauActuel);
+                
+                // Log pour traçabilité
+                System.out.println(String.format(
+                    "🔄 Créneau ID %d : disponible %s → %s (réservations actives: %d/%d)",
+                    creneauActuel.getId(),
+                    !nouvelleDisponibilite ? "true" : "false", 
+                    nouvelleDisponibilite ? "true" : "false",
+                    reservationsActives,
+                    creneauActuel.getCapaciteTotale()
+                ));
+            }
+        }
+    }
+    
+    /**
+     * Vérifie si un changement de statut affecte la disponibilité du créneau
+     */
+    private boolean isStatutChangeAffectingAvailability(StatutReservation ancienStatut, StatutReservation nouveauStatut) {
+        // Les statuts qui comptent comme "actifs" (occupent une place)
+        boolean ancienActif = ancienStatut != StatutReservation.ANNULEE;
+        boolean nouveauActif = nouveauStatut != StatutReservation.ANNULEE;
+        
+        // Retourne true si le statut passe de actif à inactif ou vice versa
+        return ancienActif != nouveauActif;
     }
 } 

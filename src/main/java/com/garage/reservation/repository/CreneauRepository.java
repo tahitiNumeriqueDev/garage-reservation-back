@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CreneauRepository extends JpaRepository<Creneau, Long> {
@@ -67,4 +68,21 @@ public interface CreneauRepository extends JpaRepository<Creneau, Long> {
            "HAVING COUNT(CASE WHEN r.statut != 'ANNULEE' THEN 1 END) < c.capaciteTotale " +
            "ORDER BY c.heureDebut")
     List<Creneau> findCreneauxDisponiblesByWeek(@Param("debutSemaine") Instant debutSemaine, @Param("finSemaine") Instant finSemaine);
+    
+    /**
+     * Vérifie si un créneau est réellement disponible en comptant ses réservations actives
+     */
+    @Query("SELECT CASE WHEN (c.disponible = true AND " +
+           "COUNT(CASE WHEN r.statut != 'ANNULEE' THEN 1 END) < c.capaciteTotale) " +
+           "THEN true ELSE false END " +
+           "FROM Creneau c LEFT JOIN c.reservations r " +
+           "WHERE c.id = :creneauId " +
+           "GROUP BY c.id, c.disponible, c.capaciteTotale")
+    Boolean isCreneauReallyAvailable(@Param("creneauId") Long creneauId);
+    
+    /**
+     * Récupère un créneau avec ses réservations chargées (pour éviter le lazy loading)
+     */
+    @Query("SELECT c FROM Creneau c LEFT JOIN FETCH c.reservations WHERE c.id = :id")
+    Optional<Creneau> findByIdWithReservations(@Param("id") Long id);
 } 
