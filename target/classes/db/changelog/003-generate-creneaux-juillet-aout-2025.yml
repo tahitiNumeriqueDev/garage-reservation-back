@@ -146,10 +146,10 @@ databaseChangeLog:
   # ============================================================================
   
   - changeSet:
-      id: 003-generate-remaining-creneaux-sql
+      id: 003-generate-remaining-creneaux-sql-postgresql
       author: garage-api
-      comment: "Génération automatique du reste des créneaux via SQL (plus efficace pour les gros volumes)"
-      context: "prod,dev"
+      comment: "Génération automatique PostgreSQL via PL/pgSQL (production)"
+      context: "prod"
       runOnChange: false
       runAlways: false
       dbms: "postgresql"
@@ -168,9 +168,9 @@ databaseChangeLog:
               -- Fonction temporaire pour générer les créneaux
               DO $$ 
               DECLARE 
-                  current_date DATE;
-                  current_time TIME;
-                  next_time TIME;
+                  date_courante DATE;
+                  heure_courante TIME;
+                  heure_suivante TIME;
                   creneau_debut TIMESTAMP;
                   creneau_fin TIMESTAMP;
                   jour_semaine INTEGER;
@@ -178,28 +178,28 @@ databaseChangeLog:
                   compteur INTEGER := 0;
               BEGIN
                   -- Parcourir tous les jours de juillet et août 2025 (à partir du 3 juillet)
-                  current_date := '2025-07-03';
+                  date_courante := '2025-07-03';
                   
-                  WHILE current_date <= '2025-08-31' LOOP
+                  WHILE date_courante <= '2025-08-31' LOOP
                       -- Obtenir le jour de la semaine (1=Lundi, 7=Dimanche)
-                      jour_semaine := EXTRACT(DOW FROM current_date);
-                      IF jour_semaine = 0 THEN jour_semaine = 7; END IF; -- Dimanche = 7
+                      jour_semaine := EXTRACT(DOW FROM date_courante);
+                      IF jour_semaine = 0 THEN jour_semaine := 7; END IF; -- Dimanche = 7
                       
                       -- Vérifier si c'est un jour férié
-                      est_ferie := current_date IN ('2025-07-14', '2025-08-15');
+                      est_ferie := date_courante IN ('2025-07-14', '2025-08-15');
                       
                       -- Traiter seulement les jours ouvrables (lundi à samedi, hors fériés)
                       IF jour_semaine BETWEEN 1 AND 6 AND NOT est_ferie THEN
                           -- Générer les créneaux pour cette journée (8h-18h)
-                          current_time := '08:00:00';
+                          heure_courante := '08:00:00';
                           
-                          WHILE current_time < '18:00:00' LOOP
-                              next_time := current_time + INTERVAL '1 hour';
+                          WHILE heure_courante < '18:00:00' LOOP
+                              heure_suivante := heure_courante + INTERVAL '1 hour';
                               
                               -- Exclure la pause déjeuner (12h-14h)
-                              IF current_time NOT IN ('12:00:00', '13:00:00') THEN
-                                  creneau_debut := current_date + current_time;
-                                  creneau_fin := current_date + next_time;
+                              IF heure_courante NOT IN ('12:00:00', '13:00:00') THEN
+                                  creneau_debut := date_courante + heure_courante;
+                                  creneau_fin := date_courante + heure_suivante;
                                   
                                   -- Insérer le créneau
                                   INSERT INTO creneaux (heure_debut, heure_fin, disponible, capacite_totale) 
@@ -208,11 +208,11 @@ databaseChangeLog:
                                   compteur := compteur + 1;
                               END IF;
                               
-                              current_time := next_time;
+                              heure_courante := heure_suivante;
                           END LOOP;
                       END IF;
                       
-                      current_date := current_date + 1;
+                      date_courante := date_courante + 1;
                   END LOOP;
                   
                   RAISE NOTICE 'Migration Liquibase : % créneaux générés pour juillet-août 2025', compteur;
@@ -225,23 +225,229 @@ databaseChangeLog:
             tableName: creneaux
             where: "heure_debut >= '2025-07-03' AND heure_debut < '2025-09-01'"
 
+  # ============================================================================  
+  # Version H2 simplifiée pour le développement local
+  # ============================================================================
+  
+  - changeSet:
+      id: 003-generate-remaining-creneaux-h2-dev
+      author: garage-api
+      comment: "Génération H2 simplifiée pour développement (quelques jours test)"
+      context: "dev"
+      runOnChange: false
+      runAlways: false
+      dbms: "h2"
+      
+      preConditions:
+        - onFail: WARN
+        - onError: CONTINUE
+        - sqlCheck:
+            expectedResult: 0
+            sql: "SELECT COUNT(*) FROM creneaux WHERE heure_debut >= '2025-07-03' AND heure_debut < '2025-07-10'"
+      
+      changes:
+        # Quelques jours de test pour le développement H2
+        # Jeudi 3 juillet 2025
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-03 08:00:00" }
+              - column: { name: heure_fin, value: "2025-07-03 09:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-03 09:00:00" }
+              - column: { name: heure_fin, value: "2025-07-03 10:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-03 10:00:00" }
+              - column: { name: heure_fin, value: "2025-07-03 11:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-03 11:00:00" }
+              - column: { name: heure_fin, value: "2025-07-03 12:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-03 14:00:00" }
+              - column: { name: heure_fin, value: "2025-07-03 15:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-03 15:00:00" }
+              - column: { name: heure_fin, value: "2025-07-03 16:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-03 16:00:00" }
+              - column: { name: heure_fin, value: "2025-07-03 17:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-03 17:00:00" }
+              - column: { name: heure_fin, value: "2025-07-03 18:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+              
+        # Vendredi 4 juillet 2025
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-04 08:00:00" }
+              - column: { name: heure_fin, value: "2025-07-04 09:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-04 09:00:00" }
+              - column: { name: heure_fin, value: "2025-07-04 10:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-04 10:00:00" }
+              - column: { name: heure_fin, value: "2025-07-04 11:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-04 11:00:00" }
+              - column: { name: heure_fin, value: "2025-07-04 12:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-04 14:00:00" }
+              - column: { name: heure_fin, value: "2025-07-04 15:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-04 15:00:00" }
+              - column: { name: heure_fin, value: "2025-07-04 16:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-04 16:00:00" }
+              - column: { name: heure_fin, value: "2025-07-04 17:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-04 17:00:00" }
+              - column: { name: heure_fin, value: "2025-07-04 18:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+              
+        # Samedi 5 juillet 2025
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-05 08:00:00" }
+              - column: { name: heure_fin, value: "2025-07-05 09:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-05 09:00:00" }
+              - column: { name: heure_fin, value: "2025-07-05 10:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-05 10:00:00" }
+              - column: { name: heure_fin, value: "2025-07-05 11:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-05 11:00:00" }
+              - column: { name: heure_fin, value: "2025-07-05 12:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-05 14:00:00" }
+              - column: { name: heure_fin, value: "2025-07-05 15:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-05 15:00:00" }
+              - column: { name: heure_fin, value: "2025-07-05 16:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-05 16:00:00" }
+              - column: { name: heure_fin, value: "2025-07-05 17:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+        - insert:
+            tableName: creneaux
+            columns:
+              - column: { name: heure_debut, value: "2025-07-05 17:00:00" }
+              - column: { name: heure_fin, value: "2025-07-05 18:00:00" }
+              - column: { name: disponible, value: true }
+              - column: { name: capacite_totale, value: 2 }
+      
+      rollback:
+        - delete:
+            tableName: creneaux
+            where: "heure_debut >= '2025-07-03' AND heure_debut < '2025-07-10'"
+
   # ============================================================================
   # Changesets de validation et documentation
   # ============================================================================
   
+  # ============================================================================
+  # Validation PostgreSQL (avec syntaxe PL/pgSQL avancée)
+  # ============================================================================
+  
   - changeSet:
-      id: 003-validate-creneaux-generation
+      id: 003-validate-creneaux-generation-postgresql
       author: garage-api
-      comment: "Validation de la génération des créneaux juillet-août 2025"
-      context: "prod,dev"
+      comment: "Validation PostgreSQL avec logs avancés"
+      context: "prod"
+      dbms: "postgresql"
       runOnChange: false
       runAlways: false
       
       changes:
         - sql:
-            comment: "Vérification et logs de la génération"
+            comment: "Vérification PostgreSQL avec PL/pgSQL"
             sql: |
-              -- Compter les créneaux générés par mois
+              -- Compter les créneaux générés par mois (PostgreSQL uniquement)
               DO $$
               DECLARE
                   nb_juillet INTEGER;
@@ -275,4 +481,52 @@ databaseChangeLog:
                       RAISE NOTICE '✅ Dimanches correctement exclus';
                   END IF;
               END $$;
-            splitStatements: false 
+            splitStatements: false
+
+  # ============================================================================
+  # Validation H2 (compatible développement local)
+  # ============================================================================
+  
+  - changeSet:
+      id: 003-validate-creneaux-generation-h2
+      author: garage-api
+      comment: "Validation H2 simplifiée pour développement local"
+      context: "dev"
+      dbms: "h2"
+      runOnChange: false
+      runAlways: false
+      
+      changes:
+        - sql:
+            comment: "Vérification H2 avec requêtes SQL standard"
+            sql: |
+              -- Compter les créneaux juillet 2025 (H2 compatible)
+              SELECT COUNT(*) as nb_juillet 
+              FROM creneaux 
+              WHERE heure_debut >= '2025-07-01' AND heure_debut < '2025-08-01';
+              
+              -- Compter les créneaux août 2025 (H2 compatible)  
+              SELECT COUNT(*) as nb_aout
+              FROM creneaux 
+              WHERE heure_debut >= '2025-08-01' AND heure_debut < '2025-09-01';
+              
+              -- Vérifier absence de créneaux les jours fériés (14/07 et 15/08) - H2 compatible
+              SELECT 
+                CASE 
+                  WHEN COUNT(*) > 0 THEN 'ATTENTION: Créneaux sur jours fériés détectés!'
+                  ELSE 'OK: Pas de créneaux sur jours fériés'
+                END as validation_feries
+              FROM creneaux 
+              WHERE CAST(heure_debut AS DATE) IN ('2025-07-14', '2025-08-15');
+              
+              -- Vérifier absence de créneaux le dimanche (DOW = 1 en H2) - H2 compatible
+              SELECT 
+                CASE 
+                  WHEN COUNT(*) > 0 THEN 'ATTENTION: Créneaux le dimanche détectés!'
+                  ELSE 'OK: Pas de créneaux le dimanche'
+                END as validation_dimanche
+              FROM creneaux 
+              WHERE EXTRACT(DOW FROM heure_debut) = 1 
+                AND heure_debut >= '2025-07-01' 
+                AND heure_debut < '2025-09-01';
+            splitStatements: true 
