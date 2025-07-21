@@ -15,7 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,7 +67,7 @@ public class ReservationController {
     @GetMapping("/telephone/{numeroTelephone}")
     public ResponseEntity<List<ReservationDTO>> getReservationsByNumeroTelephone(
             @PathVariable String numeroTelephone) {
-        List<ReservationDTO> reservations = reservationService.getReservationsByNumeroTelephone(numeroTelephone);
+        List<ReservationDTO> reservations = reservationService.getReservationsByPhone(numeroTelephone);
         return ResponseEntity.ok(reservations);
     }
     
@@ -77,7 +77,7 @@ public class ReservationController {
      */
     @GetMapping("/jour/{date}")
     public ResponseEntity<List<ReservationDTO>> getReservationsByDate(
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @PathVariable Instant date) {
         List<ReservationDTO> reservations = reservationService.getReservationsByDate(date);
         return ResponseEntity.ok(reservations);
     }
@@ -88,7 +88,7 @@ public class ReservationController {
      */
     @GetMapping("/semaine/{date}")
     public ResponseEntity<List<ReservationDTO>> getReservationsByWeek(
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @PathVariable Instant date) {
         List<ReservationDTO> reservations = reservationService.getReservationsByWeek(date);
         return ResponseEntity.ok(reservations);
     }
@@ -146,12 +146,9 @@ public class ReservationController {
     public ResponseEntity<ReservationDTO> updateStatutReservation(
             @PathVariable Long id,
             @RequestParam StatutReservation statut) {
-        try {
-            ReservationDTO reservation = reservationService.updateStatutReservation(id, statut);
-            return ResponseEntity.ok(reservation);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<ReservationDTO> reservation = reservationService.updateReservationStatut(id, statut);
+        return reservation.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
     
     /**
@@ -160,12 +157,9 @@ public class ReservationController {
      */
     @PutMapping("/{id}/confirmer")
     public ResponseEntity<ReservationDTO> confirmerReservation(@PathVariable Long id) {
-        try {
-            ReservationDTO reservation = reservationService.confirmerReservation(id);
-            return ResponseEntity.ok(reservation);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<ReservationDTO> reservation = reservationService.updateReservationStatut(id, StatutReservation.CONFIRMEE);
+        return reservation.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
     
     /**
@@ -174,12 +168,9 @@ public class ReservationController {
      */
     @PutMapping("/{id}/annuler")
     public ResponseEntity<ReservationDTO> annulerReservation(@PathVariable Long id) {
-        try {
-            ReservationDTO reservation = reservationService.annulerReservation(id);
-            return ResponseEntity.ok(reservation);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<ReservationDTO> reservation = reservationService.updateReservationStatut(id, StatutReservation.ANNULEE);
+        return reservation.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
     
     /**
@@ -188,12 +179,9 @@ public class ReservationController {
      */
     @PutMapping("/{id}/terminer")
     public ResponseEntity<ReservationDTO> terminerReservation(@PathVariable Long id) {
-        try {
-            ReservationDTO reservation = reservationService.terminerReservation(id);
-            return ResponseEntity.ok(reservation);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<ReservationDTO> reservation = reservationService.updateReservationStatut(id, StatutReservation.TERMINEE);
+        return reservation.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
     
     /**

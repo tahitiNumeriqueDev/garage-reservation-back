@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,20 +38,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * Trouve toutes les réservations entre deux dates
      */
     @Query("SELECT r FROM Reservation r WHERE r.creneau.heureDebut >= :dateDebut AND r.creneau.heureFin <= :dateFin ORDER BY r.creneau.heureDebut")
-    List<Reservation> findReservationsBetweenDates(@Param("dateDebut") LocalDateTime dateDebut, 
-                                                   @Param("dateFin") LocalDateTime dateFin);
+    List<Reservation> findReservationsBetweenDates(@Param("dateDebut") Instant dateDebut, 
+                                                   @Param("dateFin") Instant dateFin);
     
     /**
      * Trouve toutes les réservations d'un jour donné
      */
     @Query("SELECT r FROM Reservation r WHERE DATE(r.creneau.heureDebut) = DATE(:date) ORDER BY r.creneau.heureDebut")
-    List<Reservation> findReservationsByDate(@Param("date") LocalDateTime date);
+    List<Reservation> findReservationsByDate(@Param("date") Instant date);
     
     /**
      * Trouve toutes les réservations d'une semaine donnée
      */
     @Query("SELECT r FROM Reservation r WHERE WEEK(r.creneau.heureDebut) = WEEK(:date) AND YEAR(r.creneau.heureDebut) = YEAR(:date) ORDER BY r.creneau.heureDebut")
-    List<Reservation> findReservationsByWeek(@Param("date") LocalDateTime date);
+    List<Reservation> findReservationsByWeek(@Param("date") Instant date);
     
     /**
      * Compte le nombre de réservations pour un créneau donné
@@ -68,11 +68,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * Trouve toutes les réservations futures (créneaux non passés)
      */
     @Query("SELECT r FROM Reservation r WHERE r.creneau.heureDebut > :now ORDER BY r.creneau.heureDebut")
-    List<Reservation> findReservationsFutures(@Param("now") LocalDateTime now);
+    List<Reservation> findReservationsFutures(@Param("now") Instant now);
     
     /**
      * Trouve toutes les réservations passées (créneaux terminés)
      */
     @Query("SELECT r FROM Reservation r WHERE r.creneau.heureFin < :now ORDER BY r.creneau.heureDebut DESC")
-    List<Reservation> findReservationsPassees(@Param("now") LocalDateTime now);
+    List<Reservation> findReservationsPassees(@Param("now") Instant now);
 } 

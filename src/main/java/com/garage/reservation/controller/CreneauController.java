@@ -12,9 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,52 +54,52 @@ public class CreneauController {
      * Récupère les créneaux d'un jour donné
      * GET /api/creneaux/jour/{date}
      */
-    @GetMapping("/jour/{date}")
+    @GetMapping("/jour/{dateDebut}")
     @Operation(summary = "Récupère les créneaux d'un jour", description = "Retourne tous les créneaux ou seulement les disponibles pour une date donnée")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des créneaux du jour récupérée avec succès")
     })
     public ResponseEntity<List<CreneauDTO>> getCreneauxByDate(
-            @Parameter(description = "Date au format YYYY-MM-DD", example = "2024-12-23")
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @Parameter(description = "Date début au format ISO-8601", example = "2024-12-23T00:00:00Z")
+            @PathVariable Instant dateDebut,
             @Parameter(description = "Filtrer seulement les créneaux disponibles", example = "true")
             @RequestParam(defaultValue = "false") boolean disponiblesOnly) {
         
         List<CreneauDTO> creneaux;
         if (disponiblesOnly) {
-            creneaux = creneauService.getCreneauxDisponiblesByDate(date);
+            creneaux = creneauService.getCreneauxDisponiblesByDate(dateDebut);
         } else {
-            creneaux = creneauService.getCreneauxByDate(date);
+            creneaux = creneauService.getCreneauxByDate(dateDebut);
         }
         return ResponseEntity.ok(creneaux);
     }
     
     /**
      * Récupère les créneaux d'une semaine donnée
-     * GET /api/creneaux/semaine/{date}
+     * GET /api/creneaux/semaine/{dateDebut}
      */
-    @GetMapping("/semaine/{date}")
+    @GetMapping("/semaine/{dateDebut}")
     public ResponseEntity<List<CreneauDTO>> getCreneauxByWeek(
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @PathVariable Instant dateDebut,
             @RequestParam(defaultValue = "false") boolean disponiblesOnly) {
         
         List<CreneauDTO> creneaux;
         if (disponiblesOnly) {
-            creneaux = creneauService.getCreneauxDisponiblesByWeek(date);
+            creneaux = creneauService.getCreneauxDisponiblesByWeek(dateDebut);
         } else {
-            creneaux = creneauService.getCreneauxByWeek(date);
+            creneaux = creneauService.getCreneauxByWeek(dateDebut);
         }
         return ResponseEntity.ok(creneaux);
     }
     
     /**
      * Récupère les créneaux entre deux dates
-     * GET /api/creneaux/periode?dateDebut=2024-01-01T08:00:00&dateFin=2024-01-01T18:00:00
+     * GET /api/creneaux/periode?dateDebut=2024-01-01T08:00:00Z&dateFin=2024-01-01T18:00:00Z
      */
     @GetMapping("/periode")
     public ResponseEntity<List<CreneauDTO>> getCreneauxBetweenDates(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateDebut,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFin,
+            @RequestParam Instant dateDebut,
+            @RequestParam Instant dateFin,
             @RequestParam(defaultValue = "false") boolean disponiblesOnly) {
         
         List<CreneauDTO> creneaux;
@@ -127,18 +125,17 @@ public class CreneauController {
     }
     
     /**
-     * Génère des créneaux pour une journée
-     * POST /api/creneaux/generer-jour
+     * Génère des créneaux entre deux instants
+     * POST /api/creneaux/generer
      */
-    @PostMapping("/generer-jour")
-    public ResponseEntity<List<CreneauDTO>> generateCreneauxForDay(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureDebut,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureFin,
-            @RequestParam int dureeMinutes) {
+    @PostMapping("/generer")
+    public ResponseEntity<List<CreneauDTO>> generateCreneaux(
+            @RequestParam Instant debut,
+            @RequestParam Instant fin,
+            @RequestParam long dureeMinutes) {
         
         try {
-            List<CreneauDTO> creneaux = creneauService.generateCreneauxForDay(date, heureDebut, heureFin, dureeMinutes);
+            List<CreneauDTO> creneaux = creneauService.generateCreneauxBetweenInstants(debut, fin, dureeMinutes);
             return ResponseEntity.ok(creneaux);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -151,8 +148,8 @@ public class CreneauController {
      */
     @PostMapping
     public ResponseEntity<CreneauDTO> createCreneau(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime heureDebut,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime heureFin,
+            @RequestParam Instant heureDebut,
+            @RequestParam Instant heureFin,
             @RequestParam(defaultValue = "1") Integer capacite) {
         
         try {
@@ -169,7 +166,10 @@ public class CreneauController {
      */
     @GetMapping("/{id}/disponible")
     public ResponseEntity<Boolean> isCreneauDisponible(@PathVariable Long id) {
-        boolean disponible = creneauService.isCreneauDisponible(id);
-        return ResponseEntity.ok(disponible);
+        Optional<CreneauDTO> creneau = creneauService.getCreneauById(id);
+        if (creneau.isPresent()) {
+            return ResponseEntity.ok(creneau.get().getDisponible());
+        }
+        return ResponseEntity.notFound().build();
     }
 } 

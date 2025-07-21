@@ -29,12 +29,32 @@ Cette API Java Spring Boot permet de gérer les réservations de créneaux pour 
 
 ### Démarrage local
 
-#### Avec Maven
+#### Développement rapide avec H2 (recommandé)
+```bash
+# Lancer avec le profil dev
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+**Avantages du mode dev :**
+- ✅ **Pas de PostgreSQL requis** - Base H2 en mémoire
+- ✅ **Démarrage rapide** - Données de test automatiquement créées
+- ✅ **Console H2** - Interface web pour explorer la base
+- ✅ **Même API** - Fonctionnalités identiques à la production
+
+**Accès aux outils :**
+- **API** : `http://localhost:8080/api/creneaux`
+- **Swagger** : `http://localhost:8080/swagger-ui.html`
+- **Console H2** : `http://localhost:8080/h2-console`
+  - URL JDBC : `jdbc:h2:mem:garage_db`
+  - Utilisateur : `sa`
+  - Mot de passe : (vide)
+
+#### Développement avec PostgreSQL
 ```bash
 # Compiler le projet
 mvn clean compile
 
-# Lancer l'application
+# Lancer l'application (profil par défaut)
 mvn spring-boot:run
 ```
 
@@ -75,9 +95,30 @@ Une fois l'application démarrée, la documentation interactive Swagger est acce
 - **JSON OpenAPI** : `http://localhost:8080/api-docs`
 - **YAML OpenAPI** : `http://localhost:8080/api-docs.yaml`
 
+### Profils Spring Boot
+
+L'application propose plusieurs profils de configuration :
+
+#### Profil `dev` (H2)
+- **Usage** : Développement local rapide
+- **Base de données** : H2 en mémoire
+- **Avantages** : Pas de setup, démarrage rapide, console web
+- **Commande** : `mvn spring-boot:run -Dspring-boot.run.profiles=dev`
+
+#### Profil `default` (PostgreSQL)
+- **Usage** : Développement avec PostgreSQL local
+- **Base de données** : PostgreSQL locale
+- **Avantages** : Identique à la production
+- **Commande** : `mvn spring-boot:run`
+
+#### Profil `production` (Railway)
+- **Usage** : Déploiement sur Railway
+- **Base de données** : PostgreSQL Railway
+- **Configuration** : Variables d'environnement Railway
+
 ### Configuration base de données
 
-#### Variables d'environnement
+#### Variables d'environnement (PostgreSQL)
 L'application utilise les variables d'environnement suivantes :
 - `DATABASE_URL` : URL complète de la base de données PostgreSQL
 - `DATABASE_USER` : Nom d'utilisateur de la base de données
@@ -287,6 +328,7 @@ Les données de test sont définies dans le fichier `src/main/resources/db/chang
 garage-reservation/
 ├── Dockerfile                      # Configuration Docker
 ├── .dockerignore                   # Fichiers ignorés par Docker
+├── docker-compose.yml              # Docker Compose pour dev local
 ├── pom.xml                        # Configuration Maven
 ├── README.md                      # Documentation
 ├── src/main/java/com/garage/reservation/
@@ -303,7 +345,8 @@ garage-reservation/
     │   ├── db.changelog-master.xml
     │   ├── 001-create-tables.xml
     │   └── 002-insert-sample-data.xml
-    └── application.properties
+    ├── application.properties         # Configuration par défaut (PostgreSQL)
+    └── application-dev.properties     # Configuration développement (H2)
 ```
 
 ### Tests
