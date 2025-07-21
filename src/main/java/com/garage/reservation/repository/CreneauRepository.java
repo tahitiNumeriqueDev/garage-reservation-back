@@ -13,6 +13,12 @@ import java.util.List;
 public interface CreneauRepository extends JpaRepository<Creneau, Long> {
     
     /**
+     * Trouve le créneau disponible par ID
+     */
+    @Query("SELECT c FROM Creneau c WHERE c.id = :id AND c.disponible = true")
+    List<Creneau> findCreneauDisponible(@Param("id") Long id);
+    
+    /**
      * Trouve tous les créneaux entre deux dates
      */
     @Query("SELECT c FROM Creneau c WHERE c.heureDebut >= :dateDebut AND c.heureFin <= :dateFin ORDER BY c.heureDebut")
@@ -27,32 +33,26 @@ public interface CreneauRepository extends JpaRepository<Creneau, Long> {
                                                       @Param("dateFin") Instant dateFin);
     
     /**
-     * Trouve tous les créneaux d'un jour donné
+     * Trouve tous les créneaux d'un jour donné (entre 00:00 et 23:59:59)
      */
-    @Query("SELECT c FROM Creneau c WHERE DATE(c.heureDebut) = DATE(:date) ORDER BY c.heureDebut")
-    List<Creneau> findCreneauxByDate(@Param("date") Instant date);
+    @Query("SELECT c FROM Creneau c WHERE c.heureDebut >= :debutJour AND c.heureDebut < :finJour ORDER BY c.heureDebut")
+    List<Creneau> findCreneauxByDate(@Param("debutJour") Instant debutJour, @Param("finJour") Instant finJour);
     
     /**
-     * Trouve tous les créneaux disponibles d'un jour donné
+     * Trouve tous les créneaux disponibles d'un jour donné (entre 00:00 et 23:59:59)
      */
-    @Query("SELECT c FROM Creneau c WHERE DATE(c.heureDebut) = DATE(:date) AND c.disponible = true ORDER BY c.heureDebut")
-    List<Creneau> findCreneauxDisponiblesByDate(@Param("date") Instant date);
+    @Query("SELECT c FROM Creneau c WHERE c.heureDebut >= :debutJour AND c.heureDebut < :finJour AND c.disponible = true ORDER BY c.heureDebut")
+    List<Creneau> findCreneauxDisponiblesByDate(@Param("debutJour") Instant debutJour, @Param("finJour") Instant finJour);
     
     /**
-     * Trouve tous les créneaux d'une semaine donnée
+     * Trouve tous les créneaux d'une semaine (du lundi au dimanche)
      */
-    @Query("SELECT c FROM Creneau c WHERE WEEK(c.heureDebut) = WEEK(:date) AND YEAR(c.heureDebut) = YEAR(:date) ORDER BY c.heureDebut")
-    List<Creneau> findCreneauxByWeek(@Param("date") Instant date);
+    @Query("SELECT c FROM Creneau c WHERE c.heureDebut >= :debutSemaine AND c.heureDebut < :finSemaine ORDER BY c.heureDebut")
+    List<Creneau> findCreneauxByWeek(@Param("debutSemaine") Instant debutSemaine, @Param("finSemaine") Instant finSemaine);
     
     /**
-     * Trouve tous les créneaux disponibles d'une semaine donnée
+     * Trouve tous les créneaux disponibles d'une semaine (du lundi au dimanche)
      */
-    @Query("SELECT c FROM Creneau c WHERE WEEK(c.heureDebut) = WEEK(:date) AND YEAR(c.heureDebut) = YEAR(:date) AND c.disponible = true ORDER BY c.heureDebut")
-    List<Creneau> findCreneauxDisponiblesByWeek(@Param("date") Instant date);
-    
-    /**
-     * Vérifie si un créneau est disponible (moins de réservations que la capacité)
-     */
-    @Query("SELECT c FROM Creneau c LEFT JOIN c.reservations r WHERE c.id = :creneauId AND c.disponible = true GROUP BY c.id HAVING COUNT(r) < c.capaciteTotale")
-    List<Creneau> findCreneauDisponible(@Param("creneauId") Long creneauId);
+    @Query("SELECT c FROM Creneau c WHERE c.heureDebut >= :debutSemaine AND c.heureDebut < :finSemaine AND c.disponible = true ORDER BY c.heureDebut")
+    List<Creneau> findCreneauxDisponiblesByWeek(@Param("debutSemaine") Instant debutSemaine, @Param("finSemaine") Instant finSemaine);
 } 

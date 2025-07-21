@@ -4,6 +4,7 @@ import com.garage.reservation.dto.CreneauDTO;
 import com.garage.reservation.mapper.CreneauMapper;
 import com.garage.reservation.model.Creneau;
 import com.garage.reservation.repository.CreneauRepository;
+import com.garage.reservation.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,9 @@ public class CreneauService {
      * Récupère les créneaux d'un jour donné
      */
     public List<CreneauDTO> getCreneauxByDate(Instant date) {
-        return creneauRepository.findCreneauxByDate(date)
+        Instant debutJour = DateTimeUtil.getStartOfDay(date);
+        Instant finJour = DateTimeUtil.getStartOfNextDay(date);
+        return creneauRepository.findCreneauxByDate(debutJour, finJour)
                 .stream()
                 .map(creneauMapper::toDTO)
                 .collect(Collectors.toList());
@@ -51,7 +54,9 @@ public class CreneauService {
      * Récupère les créneaux disponibles d'un jour donné
      */
     public List<CreneauDTO> getCreneauxDisponiblesByDate(Instant date) {
-        return creneauRepository.findCreneauxDisponiblesByDate(date)
+        Instant debutJour = DateTimeUtil.getStartOfDay(date);
+        Instant finJour = DateTimeUtil.getStartOfNextDay(date);
+        return creneauRepository.findCreneauxDisponiblesByDate(debutJour, finJour)
                 .stream()
                 .filter(creneau -> creneau.estDisponible())
                 .map(creneauMapper::toDTO)
@@ -59,20 +64,24 @@ public class CreneauService {
     }
     
     /**
-     * Récupère les créneaux d'une semaine donnée
+     * Récupère les créneaux d'une semaine donnée (du lundi au dimanche)
      */
     public List<CreneauDTO> getCreneauxByWeek(Instant date) {
-        return creneauRepository.findCreneauxByWeek(date)
+        Instant debutSemaine = DateTimeUtil.getStartOfWeek(date);
+        Instant finSemaine = DateTimeUtil.getStartOfNextWeek(date);
+        return creneauRepository.findCreneauxByWeek(debutSemaine, finSemaine)
                 .stream()
                 .map(creneauMapper::toDTO)
                 .collect(Collectors.toList());
     }
     
     /**
-     * Récupère les créneaux disponibles d'une semaine donnée
+     * Récupère les créneaux disponibles d'une semaine donnée (du lundi au dimanche)
      */
     public List<CreneauDTO> getCreneauxDisponiblesByWeek(Instant date) {
-        return creneauRepository.findCreneauxDisponiblesByWeek(date)
+        Instant debutSemaine = DateTimeUtil.getStartOfWeek(date);
+        Instant finSemaine = DateTimeUtil.getStartOfNextWeek(date);
+        return creneauRepository.findCreneauxDisponiblesByWeek(debutSemaine, finSemaine)
                 .stream()
                 .filter(creneau -> creneau.estDisponible())
                 .map(creneauMapper::toDTO)

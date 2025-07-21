@@ -42,16 +42,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                    @Param("dateFin") Instant dateFin);
     
     /**
-     * Trouve toutes les réservations d'un jour donné
+     * Trouve toutes les réservations d'un jour donné (entre 00:00 et 23:59:59)
      */
-    @Query("SELECT r FROM Reservation r WHERE DATE(r.creneau.heureDebut) = DATE(:date) ORDER BY r.creneau.heureDebut")
-    List<Reservation> findReservationsByDate(@Param("date") Instant date);
+    @Query("SELECT r FROM Reservation r WHERE r.creneau.heureDebut >= :debutJour AND r.creneau.heureDebut < :finJour ORDER BY r.creneau.heureDebut")
+    List<Reservation> findReservationsByDate(@Param("debutJour") Instant debutJour, @Param("finJour") Instant finJour);
     
     /**
-     * Trouve toutes les réservations d'une semaine donnée
+     * Trouve toutes les réservations d'une semaine (du lundi au dimanche)
      */
-    @Query("SELECT r FROM Reservation r WHERE WEEK(r.creneau.heureDebut) = WEEK(:date) AND YEAR(r.creneau.heureDebut) = YEAR(:date) ORDER BY r.creneau.heureDebut")
-    List<Reservation> findReservationsByWeek(@Param("date") Instant date);
+    @Query("SELECT r FROM Reservation r WHERE r.creneau.heureDebut >= :debutSemaine AND r.creneau.heureDebut < :finSemaine ORDER BY r.creneau.heureDebut")
+    List<Reservation> findReservationsByWeek(@Param("debutSemaine") Instant debutSemaine, @Param("finSemaine") Instant finSemaine);
     
     /**
      * Compte le nombre de réservations pour un créneau donné
@@ -60,7 +60,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Long countReservationsByCreneauId(@Param("creneauId") Long creneauId);
     
     /**
-     * Vérifie si une réservation existe déjà pour une immatriculation et un créneau donné
+     * Trouve une réservation par immatriculation et créneau
      */
     Optional<Reservation> findByImmatriculationAndCreneauId(String immatriculation, Long creneauId);
     

@@ -8,6 +8,7 @@ import com.garage.reservation.model.Reservation;
 import com.garage.reservation.model.StatutReservation;
 import com.garage.reservation.repository.CreneauRepository;
 import com.garage.reservation.repository.ReservationRepository;
+import com.garage.reservation.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,17 +69,21 @@ public class ReservationService {
      * Récupère les réservations d'un jour donné
      */
     public List<ReservationDTO> getReservationsByDate(Instant date) {
-        return reservationRepository.findReservationsByDate(date)
+        Instant debutJour = DateTimeUtil.getStartOfDay(date);
+        Instant finJour = DateTimeUtil.getStartOfNextDay(date);
+        return reservationRepository.findReservationsByDate(debutJour, finJour)
                 .stream()
                 .map(reservationMapper::toDTO)
                 .collect(Collectors.toList());
     }
     
     /**
-     * Récupère les réservations d'une semaine donnée
+     * Récupère les réservations d'une semaine donnée (du lundi au dimanche)
      */
     public List<ReservationDTO> getReservationsByWeek(Instant date) {
-        return reservationRepository.findReservationsByWeek(date)
+        Instant debutSemaine = DateTimeUtil.getStartOfWeek(date);
+        Instant finSemaine = DateTimeUtil.getStartOfNextWeek(date);
+        return reservationRepository.findReservationsByWeek(debutSemaine, finSemaine)
                 .stream()
                 .map(reservationMapper::toDTO)
                 .collect(Collectors.toList());

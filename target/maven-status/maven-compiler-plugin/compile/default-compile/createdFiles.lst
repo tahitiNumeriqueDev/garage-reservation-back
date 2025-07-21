@@ -19,6 +19,7 @@ com/garage/reservation/service/ReservationService.class
 com/garage/reservation/dto/CreationReservationDTO.class
 com/garage/reservation/model/Reservation.class
 com/garage/reservation/mapper/CreneauMapper.class
+com/garage/reservation/util/DateTimeUtil.class
 com/garage/reservation/repository/CreneauRepository.class
 com/garage/reservation/config/OpenApiConfig.class
 com/garage/reservation/dto/CreneauDTO.class
